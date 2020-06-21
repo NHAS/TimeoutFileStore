@@ -45,7 +45,12 @@ func addUser(db *gorm.DB, name, password string, admin bool) error {
 		return err
 	}
 
-	newUser := &user{Username: name, Password: string(hashBytes), Admin: admin}
+	guid, err := GenerateHexToken(16)
+	if err != nil {
+		return err
+	}
+
+	newUser := &user{Username: name, Password: string(hashBytes), GUID: guid, Admin: admin}
 
 	return db.Debug().Create(newUser).Error
 }

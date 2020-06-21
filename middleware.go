@@ -8,7 +8,7 @@ import (
 	"github.com/jinzhu/gorm"
 )
 
-func checkCookie(c *gin.Context, db *gorm.DB) (valid, admin bool, username, token string) {
+func checkCookie(c *gin.Context, db *gorm.DB) (valid, admin bool, userGUID, token string) {
 	contents, err := c.Cookie(CookieName)
 	if err != nil {
 		return false, false, "", ""
@@ -29,23 +29,30 @@ func checkCookie(c *gin.Context, db *gorm.DB) (valid, admin bool, username, toke
 		return false, false, "", ""
 	}
 
-	return true, record.Admin, parts[0], parts[1]
+	return true, record.Admin, record.GUID, parts[1]
 }
 
 func adminAuthorisionMiddleware(db *gorm.DB) gin.HandlerFunc {
 	return func(c *gin.Context) {
-		if valid, isAdmin, _, _ := checkCookie(c, db); !valid || !isAdmin {
+		valid, isAdmin, guid, _ := checkCookie(c, db)
+		if !valid || !isAdmin {
 			denyRequest(c)
 			return
 		}
+		c.Keys = make(map[string]interface{}) // ??? I think this might be a bug in gin...
+
+		c.Keys["guid"] = guid
 	}
 }
 
 func userAuthorisionMiddleware(db *gorm.DB) gin.HandlerFunc {
 	return func(c *gin.Context) {
-		if valid, _, _, _ := checkCookie(c, db); valid {
+		valid, _, guid, _ := checkCookie(c, db)
+		if !valid {
 			denyRequest(c)
 			return
 		}
+		c.Keys = make(map[string]interface{})
+		c.Keys["guid"] = guid
 	}
 }

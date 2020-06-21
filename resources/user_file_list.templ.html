@@ -1,0 +1,29 @@
+{{template "UserDashboard_Top"}}
+<div class="space">
+    <h1>Files</h1>
+    <table class="table">
+        <thead>
+            <tr>
+                <th scope="col">Filename</th>
+                <th scope="col">Created</th>
+                <th scope="col">Expires</th>
+                <th scope="col">Remove</th>
+            </tr>
+        <tbody>
+
+            {{range $file := .Files}}
+            <tr>
+
+                <td><a href="/user/file/download/{{$file.GUID}}">{{$file.Name}}</a></td>
+                <td>{{$file.CreatedAt}}</td>
+                <td>{{$file.ExpiresAt}}</td>
+                <td><a href="/user/file/remove/{{$file.GUID}}">Remove</a></td>
+
+            </tr>
+            {{end}}
+
+        </tbody>
+        </thead>
+    </table>
+</div>
+{{template "UserDashboard_Bottom"}}

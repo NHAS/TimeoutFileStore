@@ -11,6 +11,18 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
+func setupSessionRoutes(r *gin.Engine, db *gorm.DB) {
+
+	b, err := GenerateRandomBytes(16)
+	check(err)
+
+	dummyPassword, err := bcrypt.GenerateFromPassword(b, bcrypt.DefaultCost)
+	check(err)
+
+	r.POST("/authenticate", authenticatePOST(db, dummyPassword))
+	r.GET("/logout", logoutGET(db))
+}
+
 func authenticatePOST(db *gorm.DB, dummyPassword []byte) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		var u user
@@ -53,7 +65,7 @@ func authenticatePOST(db *gorm.DB, dummyPassword []byte) gin.HandlerFunc {
 		if record.Admin {
 			c.Redirect(302, "/admin")
 		} else {
-			c.Redirect(302, "/user/"+record.GUID)
+			c.Redirect(302, "/user/")
 		}
 
 	}
@@ -62,7 +74,7 @@ func authenticatePOST(db *gorm.DB, dummyPassword []byte) gin.HandlerFunc {
 
 func logoutGET(db *gorm.DB) gin.HandlerFunc {
 	return func(c *gin.Context) {
-		valid, _, username, token := checkCookie(c, db)
+		valid, _, guid, token := checkCookie(c, db)
 		if !valid {
 			denyRequest(c)
 			return
@@ -75,7 +87,7 @@ func logoutGET(db *gorm.DB) gin.HandlerFunc {
 			return
 		}
 
-		if err := db.Debug().Model(&user{}).Where("username = ? AND token = ?", username, token).Updates(user{Token: newToken, TokenCreatedAt: time.Now()}).Error; err != nil {
+		if err := db.Debug().Model(&user{}).Where("guid = ? AND token = ?", guid, token).Updates(user{Token: newToken, TokenCreatedAt: time.Now()}).Error; err != nil {
 			log.Println("Error saving token in database: ", err)
 			c.String(http.StatusInternalServerError, "Server error")
 			return

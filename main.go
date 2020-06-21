@@ -20,12 +20,12 @@ type file struct {
 	UserId    int64
 	Path      string
 	Name      string
-	GUID      string
+	GUID      string `gorm:"unique;not null"`
 }
 
 type user struct {
 	Id             int64     `form:"-"`
-	GUID           string    `form:"-"`
+	GUID           string    `form:"-" gorm:"unique;not null"`
 	Username       string    `form:"username" binding:"required" gorm:"unique;not null"`
 	Password       string    `form:"password" binding:"required" gorm:"unique;not null"`
 	Token          string    `form:"-"`
@@ -57,16 +57,15 @@ func main() {
 	defer db.Close()
 
 	db.AutoMigrate(&user{}, &file{})
-
 	r := gin.Default()
 	r.Static("/index_files", "./resources/index_files")
 	r.LoadHTMLGlob("resources/*.templ.html")
 
 	r.GET("/", index(db))
 
+	setupSessionRoutes(r, db)
 	setupAdminRoutes(r, db)
 	setupUserRoutes(r, db)
-	setupSessionRoutes(r, db)
 
 	r.Run(":8080")
 }
