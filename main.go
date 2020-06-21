@@ -1,6 +1,12 @@
 package main
 
 import (
+	"context"
+	"log"
+	"net/http"
+	"os"
+	"os/signal"
+	"syscall"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -57,6 +63,7 @@ func main() {
 	defer db.Close()
 
 	db.AutoMigrate(&user{}, &file{})
+
 	r := gin.Default()
 	r.Static("/index_files", "./resources/index_files")
 	//Probably a better way of loading these would be generating a slice using file walk
@@ -68,5 +75,27 @@ func main() {
 	setupAdminRoutes(r, db)
 	setupUserRoutes(r, db)
 
-	r.Run(":8080")
+	srv := &http.Server{
+		Addr:    ":8080",
+		Handler: r,
+	}
+
+	go func() {
+		if err := srv.ListenAndServe(); err != nil && err != http.ErrServerClosed {
+			log.Fatalf("Listen error: %s\n", err)
+		}
+	}()
+
+	quit := make(chan os.Signal)
+
+	signal.Notify(quit, syscall.SIGINT, syscall.SIGTERM)
+	<-quit
+	log.Println("Shutting down....")
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+	if err := srv.Shutdown(ctx); err != nil {
+		log.Fatalln("Server was forced to shutdown: ", err)
+	}
+	log.Println("Done! Cya")
+
 }
