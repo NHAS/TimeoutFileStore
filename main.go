@@ -59,7 +59,8 @@ func main() {
 	db.AutoMigrate(&user{}, &file{})
 	r := gin.Default()
 	r.Static("/index_files", "./resources/index_files")
-	r.LoadHTMLGlob("resources/*.templ.html")
+	//Probably a better way of loading these would be generating a slice using file walk
+	r.LoadHTMLGlob("resources/*/*.templ.html")
 
 	r.GET("/", index(db))
 

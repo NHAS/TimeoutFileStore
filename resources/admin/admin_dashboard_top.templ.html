@@ -1,3 +1,4 @@
+{{define "AdminDashboard_Top"}}
 <!DOCTYPE html>
 <html lang="en">
 
@@ -31,12 +32,18 @@
 
         <div class="collapse navbar-collapse" id="navbarsExampleDefault">
             <ul class="navbar-nav mr-auto">
-                <li class="nav-item active">
-                    <a class="nav-link" href="#">Create User</a>
+                <li class="nav-item">
+                    <a class="nav-link" href="/admin/create_user">Create User</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/user">Files</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/user/file">Create User</a>
                 </li>
             </ul>
             <ul class="navbar-nav ml-auto">
-                <li class="nav-item nav-i active">
+                <li class="nav-item nav-i">
                     <a class="nav-link" href="/logout">Logout</a>
                 </li>
             </ul>
@@ -45,34 +52,4 @@
 
     <main role="main" class="container">
 
-        <div class="space">
-            <h1>Users</h1>
-            <table class="table">
-                <thead>
-                    <tr>
-                        <th scope="col">Username</th>
-                        <th scope="col">Last Token Created At</th>
-                    </tr>
-                <tbody>
-                    {{range $user := .Users}}
-                    <tr>
-
-                        <td>{{$user.Username}}</td>
-                        <td>{{$user.TokenCreatedAt}}</td>
-
-                    </tr>
-                    {{end}}
-                </tbody>
-                </thead>
-            </table>
-        </div>
-
-    </main><!-- /.container -->
-
-    {{template "ExternalScripts" .}}
-
-</body>
-
-
-
-</html>
+        {{end}}

@@ -6,7 +6,6 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
-	"github.com/gin-gonic/gin/binding"
 	"github.com/jinzhu/gorm"
 	"golang.org/x/crypto/bcrypt"
 )
@@ -25,28 +24,29 @@ func setupSessionRoutes(r *gin.Engine, db *gorm.DB) {
 
 func authenticatePOST(db *gorm.DB, dummyPassword []byte) gin.HandlerFunc {
 	return func(c *gin.Context) {
-		var u user
-		if err := c.ShouldBindWith(&u, binding.Form); err != nil {
-			log.Println(err)
+		username := c.PostForm("username")
+		password := c.PostForm("password")
+
+		if len(username) == 0 || len(password) == 0 {
 			c.Redirect(302, "/")
 			return
 		}
 
 		var record user
-		if err := db.Where("username = ?", u.Username).First(&record).Error; err != nil {
-			bcrypt.CompareHashAndPassword(dummyPassword, []byte(u.Password)) // Dummy compair to stop timing attacks
+		if err := db.Where("username = ?", username).First(&record).Error; err != nil {
+			bcrypt.CompareHashAndPassword(dummyPassword, []byte(password)) // Dummy compair to stop timing attacks
 			c.Redirect(302, "/")
 			log.Println(err)
 			return
 		}
 
-		if err := bcrypt.CompareHashAndPassword([]byte(record.Password), []byte(u.Password)); err != nil {
+		if err := bcrypt.CompareHashAndPassword([]byte(record.Password), []byte(password)); err != nil {
 			c.Redirect(302, "/")
 			log.Println(err)
 			return
 		}
 
-		u.Password = "" // Clear password from memory asap
+		password = "" // Clear password from memory asap
 
 		token, err := GenerateHexToken(TokenSize)
 		if err != nil {
