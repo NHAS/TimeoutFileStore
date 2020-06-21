@@ -21,8 +21,8 @@ const (
 
 type file struct {
 	Id        int64
-	CreatedAt time.Time
-	ExpiresAt time.Time
+	CreatedAt int64
+	ExpiresAt int64
 	UserId    int64
 	Path      string
 	Name      string
@@ -30,14 +30,14 @@ type file struct {
 }
 
 type user struct {
-	Id             int64     `form:"-"`
-	GUID           string    `form:"-" gorm:"unique;not null"`
-	Username       string    `form:"username" binding:"required" gorm:"unique;not null"`
-	Password       string    `form:"password" binding:"required" gorm:"unique;not null"`
-	Token          string    `form:"-"`
-	TokenCreatedAt time.Time `form:"-"`
-	Files          []file    `form:"-"`
-	Admin          bool      `form:"-"`
+	Id             int64  `form:"-"`
+	GUID           string `form:"-" gorm:"unique;not null"`
+	Username       string `form:"username" binding:"required" gorm:"unique;not null"`
+	Password       string `form:"password" binding:"required" gorm:"unique;not null"`
+	Token          string `form:"-"`
+	TokenCreatedAt int64  `form:"-"`
+	Files          []file `form:"-"`
+	Admin          bool   `form:"-"`
 }
 
 func index(db *gorm.DB) gin.HandlerFunc {
@@ -54,6 +54,33 @@ func index(db *gorm.DB) gin.HandlerFunc {
 
 		c.File("./resources/login.html")
 	}
+}
+
+func fileExpiryChecker(db *gorm.DB, end chan bool) {
+
+	for {
+		select {
+		case <-time.After(10 * time.Minute):
+			var files []file
+			if err := db.Find(&files).Error; err != nil {
+				log.Println(err)
+			}
+
+			for _, f := range files {
+				if time.Now().Unix() >= f.ExpiresAt {
+					if err := db.Delete(&f).Error; err != nil {
+						log.Println(err)
+					}
+				}
+			}
+
+		case <-end:
+			end <- true
+			return
+
+		}
+	}
+
 }
 
 func main() {
@@ -74,7 +101,6 @@ func main() {
 	setupSessionRoutes(r, db)
 	setupAdminRoutes(r, db)
 	setupUserRoutes(r, db)
-
 	srv := &http.Server{
 		Addr:    ":8080",
 		Handler: r,
@@ -86,16 +112,22 @@ func main() {
 		}
 	}()
 
+	exit := make(chan bool)
+
+	go fileExpiryChecker(db, exit)
+
 	quit := make(chan os.Signal)
 
 	signal.Notify(quit, syscall.SIGINT, syscall.SIGTERM)
 	<-quit
+	exit <- true
 	log.Println("Shutting down....")
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 	if err := srv.Shutdown(ctx); err != nil {
 		log.Fatalln("Server was forced to shutdown: ", err)
 	}
+	<-exit
 	log.Println("Done! Cya")
 
 }

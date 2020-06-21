@@ -24,7 +24,7 @@ func checkCookie(c *gin.Context, db *gorm.DB) (valid, admin bool, userGUID, toke
 		return false, false, "", ""
 	}
 
-	expiresAt := record.TokenCreatedAt.Add(1 * time.Hour)
+	expiresAt := time.Unix(record.TokenCreatedAt, 0).Add(1 * time.Hour)
 	if time.Now().After(expiresAt) {
 		return false, false, "", ""
 	}

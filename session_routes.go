@@ -55,7 +55,7 @@ func authenticatePOST(db *gorm.DB, dummyPassword []byte) gin.HandlerFunc {
 			return
 		}
 
-		if db.Model(&record).Updates(user{Token: token, TokenCreatedAt: time.Now()}).Error != nil {
+		if db.Model(&record).Updates(user{Token: token, TokenCreatedAt: time.Now().Unix()}).Error != nil {
 			log.Println("Error saving token in database: ", err)
 			c.String(http.StatusInternalServerError, "Server error")
 			return
@@ -87,7 +87,7 @@ func logoutGET(db *gorm.DB) gin.HandlerFunc {
 			return
 		}
 
-		if err := db.Debug().Model(&user{}).Where("guid = ? AND token = ?", guid, token).Updates(user{Token: newToken, TokenCreatedAt: time.Now()}).Error; err != nil {
+		if err := db.Debug().Model(&user{}).Where("guid = ? AND token = ?", guid, token).Updates(user{Token: newToken, TokenCreatedAt: time.Now().Unix()}).Error; err != nil {
 			log.Println("Error saving token in database: ", err)
 			c.String(http.StatusInternalServerError, "Server error")
 			return

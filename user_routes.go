@@ -113,7 +113,7 @@ func filePOST(db *gorm.DB) gin.HandlerFunc {
 			return
 		}
 
-		newFile := &file{Name: uploadedFile.Filename, Path: "./uploads/" + obscuredName, UserId: u.Id, GUID: guid, ExpiresAt: time.Now().Add(1 * time.Hour)}
+		newFile := &file{Name: uploadedFile.Filename, Path: "./uploads/" + obscuredName, UserId: u.Id, GUID: guid, ExpiresAt: time.Now().Add(1 * time.Hour).Unix()}
 
 		if err := db.Save(newFile).Error; err != nil {
 			c.String(http.StatusBadRequest, "Save")
