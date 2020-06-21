@@ -1,4 +1,4 @@
-{{template "UserDashboard_Top"}}
+{{template "UserDashboard_Top" .}}
 <h2>Upload File</h2>
 <form action="/user/file" method="POST" enctype="multipart/form-data">
     <div class="custom-file mb-3">
@@ -10,4 +10,4 @@
         <button type="submit" class="btn btn-primary">Submit</button>
     </div>
 </form>
-{{template "UserDashboard_Bottom"}}
+{{template "UserDashboard_Bottom" .}}

@@ -24,18 +24,21 @@ func setupUserRoutes(r *gin.Engine, db *gorm.DB) {
 
 func userGET(db *gorm.DB) gin.HandlerFunc {
 	return func(c *gin.Context) {
-		var currentUser user
-		if err := db.Preload("Files").Where("guid = ?", c.Keys["guid"]).Find(&currentUser).Error; err != nil {
+		u := c.Keys["user"].(user)
+
+		var files []file
+		if err := db.Where("user_id = ?", u.Id).Find(&files).Error; err != nil {
 			log.Println("Cant load user: ", err)
 		}
-
-		c.HTML(http.StatusOK, "user_file_list.templ.html", gin.H{"Files": currentUser.Files})
+		c.Header("Cache-Control", "no-store")
+		c.HTML(http.StatusOK, "user_file_list.templ.html", gin.H{"Admin": u.Admin, "Files": files})
 	}
 }
 
 func fileUploadGET(db *gorm.DB) gin.HandlerFunc {
 	return func(c *gin.Context) {
-		c.HTML(http.StatusOK, "user_fileupload.templ.html", nil)
+		u := c.Keys["user"].(user)
+		c.HTML(http.StatusOK, "user_fileupload.templ.html", gin.H{"Admin": u.Admin})
 	}
 }
 
@@ -78,6 +81,7 @@ func deleteFileGET(db *gorm.DB) gin.HandlerFunc {
 
 func filePOST(db *gorm.DB) gin.HandlerFunc {
 	return func(c *gin.Context) {
+		u := c.Keys["user"].(user)
 
 		uploadedFile, err := c.FormFile("file")
 		if err != nil {
@@ -95,13 +99,6 @@ func filePOST(db *gorm.DB) gin.HandlerFunc {
 
 		if err := c.SaveUploadedFile(uploadedFile, "./uploads/"+obscuredName); err != nil {
 			c.String(http.StatusBadRequest, "Uploading issue")
-			log.Println(err)
-			return
-		}
-
-		var u user
-		if err := db.Find(&u, "guid = ?", c.Keys["guid"]).Error; err != nil {
-			c.String(http.StatusBadRequest, "GUID")
 			log.Println(err)
 			return
 		}

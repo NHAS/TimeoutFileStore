@@ -22,12 +22,15 @@ func setupAdminRoutes(r *gin.Engine, db *gorm.DB) {
 
 func adminDashboard(db *gorm.DB) gin.HandlerFunc {
 	return func(c *gin.Context) {
+		u := c.Keys["user"].(user)
+
 		var users []user
 		if err := db.Find(&users).Error; err != nil {
 			log.Println("Cant load users: ", err)
 		}
-
-		c.HTML(http.StatusOK, "admin_userlist.templ.html", gin.H{"Users": users})
+		log.Println(u)
+		c.Header("Cache-Control", "no-store")
+		c.HTML(http.StatusOK, "admin_userlist.templ.html", gin.H{"Admin": u.Admin, "Users": users})
 	}
 }
 
@@ -53,7 +56,8 @@ func adminCreatePOST(db *gorm.DB) gin.HandlerFunc {
 
 func adminCreateGET() gin.HandlerFunc {
 	return func(c *gin.Context) {
-		c.HTML(http.StatusOK, "admin_createuser.templ.html", nil)
+		u := c.Keys["user"].(user)
+		c.HTML(http.StatusOK, "admin_createuser.templ.html", gin.H{"Admin": u.Admin})
 	}
 }
 

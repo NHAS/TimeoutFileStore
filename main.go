@@ -42,7 +42,7 @@ type user struct {
 
 func index(db *gorm.DB) gin.HandlerFunc {
 	return func(c *gin.Context) {
-		if valid, isAdmin, _, _ := checkCookie(c, db); valid {
+		if valid, isAdmin, _ := checkCookie(c, db); valid {
 			location := "/user"
 			if isAdmin {
 				location = "/admin"
@@ -51,7 +51,7 @@ func index(db *gorm.DB) gin.HandlerFunc {
 			c.Redirect(302, location)
 			return
 		}
-
+		c.Header("Cache-Control", "no-store")
 		c.File("./resources/login.html")
 	}
 }

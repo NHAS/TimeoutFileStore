@@ -74,7 +74,7 @@ func authenticatePOST(db *gorm.DB, dummyPassword []byte) gin.HandlerFunc {
 
 func logoutGET(db *gorm.DB) gin.HandlerFunc {
 	return func(c *gin.Context) {
-		valid, _, guid, token := checkCookie(c, db)
+		valid, _, u := checkCookie(c, db)
 		if !valid {
 			denyRequest(c)
 			return
@@ -87,7 +87,7 @@ func logoutGET(db *gorm.DB) gin.HandlerFunc {
 			return
 		}
 
-		if err := db.Debug().Model(&user{}).Where("guid = ? AND token = ?", guid, token).Updates(user{Token: newToken, TokenCreatedAt: time.Now().Unix()}).Error; err != nil {
+		if err := db.Debug().Model(&user{}).Where("guid = ? AND token = ?", u.GUID, u.Token).Updates(user{Token: newToken, TokenCreatedAt: time.Now().Unix()}).Error; err != nil {
 			log.Println("Error saving token in database: ", err)
 			c.String(http.StatusInternalServerError, "Server error")
 			return

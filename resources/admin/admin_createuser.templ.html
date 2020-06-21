@@ -1,4 +1,4 @@
-{{template "AdminDashboard_Top"}}
+{{template "AdminDashboard_Top" .}}
 <form action="/admin/create_user" method="POST">
     <div class="form-group">
         <label for="exampleInputEmail1">Username</label>
@@ -14,4 +14,4 @@
     </div>
     <button type="submit" class="btn btn-primary">Create</button>
 </form>
-{{template "AdminDashboard_Bottom"}}
+{{template "AdminDashboard_Bottom" .}}
