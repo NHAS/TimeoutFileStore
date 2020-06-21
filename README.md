@@ -7,9 +7,14 @@ Worth noting that while this follows good practice for file uploading (content-d
 * Lack of maximum content stored per user
 * GORM may or may not support sqlite3 with multiple threads, but its hard to tell (may cause race conditions under very specific circumstances) 
 * Lack of CSRF tokens (cookies are set as samesite) 
+* Self made authentication token mechanism, which may be vulnerable to god knows what, I've tried to make it as secure as possible. But meh.
 
-It is also missing three features which would be rather helpful.
+It is also missing some features which would be rather helpful:
 
-* Ability to set file expiry
-* Ability to set file public/private
-* Admin users being able to access their own files (more of a UI bug than anything due to how I've set up templating)
+* Set file expiry
+* Change password
+* Purge all files
+* Set file public/private
+
+Bugs
+* Admin unable to access their own files (more of a UI bug than anything due to how I've set up templating)
