@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta http-equiv="content-type" content="text/html; charset=UTF-8">
+    <meta charset="utf-8">
+    <meta name="robots" content="noindex, nofollow">
+
+    <title>Administrator Dashboard</title>
+
+    <style>
+        body {
+            padding-top: 5rem;
+        }
+
+        .space {
+            padding: 3rem 1.5rem;
+            text-align: center;
+        }
+    </style>
+</head>
+
+<body>
+
+    <nav class="navbar navbar-expand-md navbar-dark bg-dark fixed-top">
+        <a class="navbar-brand" href="/admin/">Dashboard</a>
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarsExampleDefault"
+            aria-controls="navbarsExampleDefault" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+
+        <div class="collapse navbar-collapse" id="navbarsExampleDefault">
+            <ul class="navbar-nav mr-auto">
+                <li class="nav-item active">
+                    <a class="nav-link" href="#">Create User</a>
+                </li>
+            </ul>
+            <ul class="navbar-nav ml-auto">
+                <li class="nav-item nav-i active">
+                    <a class="nav-link" href="/logout">Logout</a>
+                </li>
+            </ul>
+        </div>
+    </nav>
+
+    <main role="main" class="container">
+
+        <div class="space">
+            <h1>Users</h1>
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th scope="col">Username</th>
+                        <th scope="col">Last Token Created At</th>
+                    </tr>
+                <tbody>
+                    {{range $user := .Users}}
+                    <tr>
+
+                        <td>{{$user.Username}}</td>
+                        <td>{{$user.TokenCreatedAt}}</td>
+
+                    </tr>
+                    {{end}}
+                </tbody>
+                </thead>
+            </table>
+        </div>
+
+    </main><!-- /.container -->
+
+    {{template "ExternalScripts" .}}
+
+</body>
+
+
+
+</html>
