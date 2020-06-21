@@ -15,6 +15,3 @@ It is also missing some features which would be rather helpful:
 * Change password
 * Purge all files
 * Set file public/private
-
-Bugs
-* Admin unable to access their own files (more of a UI bug than anything due to how I've set up templating)
