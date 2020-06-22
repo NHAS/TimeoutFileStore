@@ -15,9 +15,15 @@
             <tr>
 
                 <td><a href="/user/file/download/{{$file.GUID}}">{{$file.Name}}</a></td>
-                <td>{{$file.CreatedAt}}</td>
-                <td>{{$file.ExpiresAt}}</td>
-                <td><a href="/user/file/remove/{{$file.GUID}}">Remove</a></td>
+                <td>{{$file.CreatedAt | humanDate}}</td>
+                <td>{{$file.ExpiresAt | humanDate}}</td>
+                <td>
+                    <form action="/user/file/remove" method="POST">
+                        <input type="hidden" name="fileid" value="{{$file.GUID}}"></input>
+                        <button type="submit" class="btn btn-danger">Delete</button>
+                        {{$.csrfField }}
+                    </form>
+                </td>
 
             </tr>
             {{end}}
@@ -26,4 +32,6 @@
         </thead>
     </table>
 </div>
+
+
 {{template "UserDashboard_Bottom" . }}

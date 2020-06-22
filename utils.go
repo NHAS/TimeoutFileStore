@@ -3,7 +3,9 @@ package main
 import (
 	"crypto/rand"
 	"encoding/hex"
+	"fmt"
 	"log"
+	"time"
 
 	"github.com/gin-gonic/gin"
 	"github.com/jinzhu/gorm"
@@ -59,4 +61,25 @@ func check(err error) {
 	if err != nil {
 		log.Fatalln(err)
 	}
+}
+
+func humanDate(epoch int64) string {
+	t1 := time.Unix(epoch, 0)
+	epochYear, epochMonth, epochDay := t1.Date()
+
+	epochHour := t1.Hour()
+	epochMin := t1.Minute()
+
+	t2 := time.Now()
+	currentYear, currentMonth, currentDay := t2.Date()
+
+	if currentYear == epochYear && currentMonth == epochMonth && currentDay == epochDay {
+		return fmt.Sprintf("Today at %02d:%02d", epochHour, epochMin)
+	}
+
+	if currentYear == epochYear {
+		return fmt.Sprintf("%02d:%02d %s %d", epochHour, epochMin, epochMonth.String()[:3], epochDay)
+	}
+
+	return fmt.Sprintf("%02d:%02d %s %d %d", epochHour, epochMin, epochMonth.String()[:3], epochDay, epochYear)
 }

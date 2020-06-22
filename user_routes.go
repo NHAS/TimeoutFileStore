@@ -4,9 +4,11 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"strconv"
 	"time"
 
 	"github.com/gin-gonic/gin"
+	"github.com/gorilla/csrf"
 	"github.com/jinzhu/gorm"
 )
 
@@ -15,11 +17,12 @@ func setupUserRoutes(r *gin.Engine, db *gorm.DB) {
 	needAuth.Use(userAuthorisionMiddleware(db))
 
 	needAuth.GET("/", userGET(db))
+	needAuth.POST("/file", filePOST(db))
+	needAuth.POST("/file/remove", deleteFilePOST(db))
+
 	needAuth.GET("/file", fileUploadGET(db))
 	needAuth.GET("/file/download/:fileid", downloadFileGET(db))
-	needAuth.GET("/file/remove/:fileid", deleteFileGET(db))
 
-	needAuth.POST("/file", filePOST(db))
 }
 
 func userGET(db *gorm.DB) gin.HandlerFunc {
@@ -31,14 +34,7 @@ func userGET(db *gorm.DB) gin.HandlerFunc {
 			log.Println("Cant load user: ", err)
 		}
 		c.Header("Cache-Control", "no-store")
-		c.HTML(http.StatusOK, "user_file_list.templ.html", gin.H{"Admin": u.Admin, "Files": files})
-	}
-}
-
-func fileUploadGET(db *gorm.DB) gin.HandlerFunc {
-	return func(c *gin.Context) {
-		u := c.Keys["user"].(user)
-		c.HTML(http.StatusOK, "user_fileupload.templ.html", gin.H{"Admin": u.Admin})
+		c.HTML(http.StatusOK, "user_file_list.templ.html", gin.H{"Admin": u.Admin, "Files": files, csrf.TemplateTag: csrf.TemplateField(c.Request)})
 	}
 }
 
@@ -55,9 +51,9 @@ func downloadFileGET(db *gorm.DB) gin.HandlerFunc {
 	}
 }
 
-func deleteFileGET(db *gorm.DB) gin.HandlerFunc {
+func deleteFilePOST(db *gorm.DB) gin.HandlerFunc {
 	return func(c *gin.Context) {
-		fileid := c.Param("fileid")
+		fileid := c.PostForm("fileid")
 
 		var currentFile file
 		if err := db.Where("guid = ?", fileid).First(&currentFile).Error; err != nil {
@@ -82,6 +78,15 @@ func deleteFileGET(db *gorm.DB) gin.HandlerFunc {
 func filePOST(db *gorm.DB) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		u := c.Keys["user"].(user)
+
+		hoursFloat, err := strconv.ParseFloat(c.PostForm("hours"), 8)
+		if err != nil {
+			c.String(http.StatusBadRequest, "Form issue")
+			log.Println(err)
+			return
+		}
+
+		hours := int64(hoursFloat * 3600)
 
 		uploadedFile, err := c.FormFile("file")
 		if err != nil {
@@ -110,7 +115,7 @@ func filePOST(db *gorm.DB) gin.HandlerFunc {
 			return
 		}
 
-		newFile := &file{Name: uploadedFile.Filename, Path: "./uploads/" + obscuredName, UserId: u.Id, GUID: guid, ExpiresAt: time.Now().Add(1 * time.Hour).Unix()}
+		newFile := &file{Name: uploadedFile.Filename, Path: "./uploads/" + obscuredName, UserId: u.Id, GUID: guid, CreatedAt: time.Now().Unix(), ExpiresAt: time.Now().Unix() + hours}
 
 		if err := db.Save(newFile).Error; err != nil {
 			c.String(http.StatusBadRequest, "Save")
@@ -119,5 +124,12 @@ func filePOST(db *gorm.DB) gin.HandlerFunc {
 		}
 
 		c.Redirect(302, "/user")
+	}
+}
+
+func fileUploadGET(db *gorm.DB) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		u := c.Keys["user"].(user)
+		c.HTML(http.StatusOK, "user_fileupload.templ.html", gin.H{"Admin": u.Admin, csrf.TemplateTag: csrf.TemplateField(c.Request)})
 	}
 }

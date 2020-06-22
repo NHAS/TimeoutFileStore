@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"html/template"
 	"log"
 	"net/http"
 	"os"
@@ -10,6 +11,7 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
+	"github.com/gorilla/csrf"
 	"github.com/jinzhu/gorm"
 	_ "github.com/jinzhu/gorm/dialects/sqlite"
 )
@@ -52,7 +54,7 @@ func index(db *gorm.DB) gin.HandlerFunc {
 			return
 		}
 		c.Header("Cache-Control", "no-store")
-		c.File("./resources/login.html")
+		c.HTML(http.StatusOK, "login.templ.html", gin.H{csrf.TemplateTag: csrf.TemplateField(c.Request)})
 	}
 }
 
@@ -92,9 +94,15 @@ func main() {
 	db.AutoMigrate(&user{}, &file{})
 
 	r := gin.Default()
+	r.SetFuncMap(template.FuncMap{
+		"humanDate": humanDate,
+	})
+
 	r.Static("/index_files", "./resources/index_files")
 	//Probably a better way of loading these would be generating a slice using file walk
 	r.LoadHTMLGlob("resources/*/*.templ.html")
+
+	CSRF := csrf.Protect([]byte("21397jLKASJOu70973JJ"), csrf.Secure(false))
 
 	r.GET("/", index(db))
 
@@ -103,7 +111,7 @@ func main() {
 	setupUserRoutes(r, db)
 	srv := &http.Server{
 		Addr:    ":8080",
-		Handler: r,
+		Handler: CSRF(r),
 	}
 
 	go func() {

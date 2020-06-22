@@ -15,9 +15,15 @@
                 <tr>
 
                     <td>{{$user.Username}}</td>
-                    <td>{{$user.TokenCreatedAt}}</td>
+                    <td>{{$user.TokenCreatedAt | humanDate}}</td>
                     <td>{{$user.Admin}}</td>
-                    <td><a href="/admin/remove/{{$user.GUID}}">Remove</a></td>
+                    <td>
+                        <form action="/admin/remove" method="POST">
+                            <input type="hidden" name="userid" value="{{$user.GUID}}"></input>
+                            <button type="submit" class="btn btn-danger">Delete</button>
+                            {{$.csrfField }}
+                        </form>
+                    </td>
 
                 </tr>
                 {{end}}

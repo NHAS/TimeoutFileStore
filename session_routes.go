@@ -62,7 +62,7 @@ func authenticatePOST(db *gorm.DB, dummyPassword []byte) gin.HandlerFunc {
 		}
 
 		c.SetSameSite(http.SameSiteStrictMode) // Stupid way of setting same site gin....
-		c.SetCookie(CookieName, record.Username+":"+token, 3600, "", "localhost:8080", true, true)
+		c.SetCookie(CookieName, record.Username+":"+token, 3600, "", "localhost:8080", false, true)
 
 		if record.Admin {
 			c.Redirect(302, "/admin")
