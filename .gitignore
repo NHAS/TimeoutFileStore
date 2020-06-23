@@ -1,3 +1,4 @@
 TimeoutFileStore
 files.db
 uploads/*
+config.json

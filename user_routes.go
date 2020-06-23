@@ -12,12 +12,12 @@ import (
 	"github.com/jinzhu/gorm"
 )
 
-func setupUserRoutes(r *gin.Engine, db *gorm.DB) {
+func setupUserRoutes(r *gin.Engine, db *gorm.DB, path string) {
 	needAuth := r.Group("/user")
 	needAuth.Use(userAuthorisionMiddleware(db))
 
 	needAuth.GET("/", userGET(db))
-	needAuth.POST("/file", filePOST(db))
+	needAuth.POST("/file", filePOST(db, path))
 	needAuth.POST("/file/remove", deleteFilePOST(db))
 
 	needAuth.GET("/file", fileUploadGET(db))
@@ -77,7 +77,7 @@ func deleteFilePOST(db *gorm.DB) gin.HandlerFunc {
 	}
 }
 
-func filePOST(db *gorm.DB) gin.HandlerFunc {
+func filePOST(db *gorm.DB, path string) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		u := c.Keys["user"].(user)
 
@@ -104,7 +104,7 @@ func filePOST(db *gorm.DB) gin.HandlerFunc {
 			return
 		}
 
-		if err := c.SaveUploadedFile(uploadedFile, "./uploads/"+obscuredName); err != nil {
+		if err := c.SaveUploadedFile(uploadedFile, path+"/"+obscuredName); err != nil {
 			c.String(http.StatusBadRequest, "Uploading issue")
 			log.Println(err)
 			return

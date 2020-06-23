@@ -1,0 +1,8 @@
+{
+    "csrf_key": "912784oiy2lkhsmjahdluP",
+    "release_mode": false,
+    "listen_addr": ":8080",
+    "database_type": "sqlite3",
+    "database_connection": "files.db",
+    "upload_directory": "./uploads"
+}

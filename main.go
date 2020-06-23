@@ -2,7 +2,9 @@ package main
 
 import (
 	"context"
+	"encoding/json"
 	"html/template"
+	"io/ioutil"
 	"log"
 	"net/http"
 	"os"
@@ -85,15 +87,35 @@ func fileExpiryChecker(db *gorm.DB, end chan bool) {
 
 }
 
+type config struct {
+	CsrfKey                  string `json:"csrf_key"`
+	Release                  bool   `json:"release_mode"`
+	ListenAddress            string `json:"listen_addr"`
+	DatabaseType             string `json:"database_type"`
+	DatabaseConnectionString string `json:"database_connection"`
+	UploadDirectory          string `json:"upload_directory"`
+}
+
 func main() {
 
-	db, err := gorm.Open("sqlite3", "files.db")
+	configBytes, err := ioutil.ReadFile("config.json")
+	check(err)
+
+	var c config
+	err = json.Unmarshal(configBytes, &c)
+	check(err)
+
+	db, err := gorm.Open(c.DatabaseType, c.DatabaseConnectionString)
 	check(err)
 	defer db.Close()
 
 	db.AutoMigrate(&user{}, &file{})
 
 	r := gin.Default()
+
+	if c.Release {
+		gin.SetMode(gin.ReleaseMode)
+	}
 	r.SetFuncMap(template.FuncMap{
 		"humanDate": humanDate,
 	})
@@ -102,13 +124,13 @@ func main() {
 	//Probably a better way of loading these would be generating a slice using file walk
 	r.LoadHTMLGlob("resources/*/*.templ.html")
 
-	CSRF := csrf.Protect([]byte("21397jLKASJOu70973JJ"), csrf.Secure(false))
+	CSRF := csrf.Protect([]byte(c.CsrfKey), csrf.Secure(c.Release))
 
 	r.GET("/", index(db))
 
 	setupSessionRoutes(r, db)
 	setupAdminRoutes(r, db)
-	setupUserRoutes(r, db)
+	setupUserRoutes(r, db, c.UploadDirectory)
 	srv := &http.Server{
 		Addr:    ":8080",
 		Handler: CSRF(r),
