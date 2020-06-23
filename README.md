@@ -2,7 +2,7 @@
 Store files for a set amount of time. 
 
 ## Use case
-Ever want to travel somewhere but not super sure about those border controls siezing your computers, forcing you to unlock them and using them to take control of your infastructure? 
+Ever want to travel somewhere but not super sure about those border controls seizing your computers, forcing you to unlock them and using them to take control of your infastructure? 
 Nope?  
 Me neither. However I think its a fun thought experiment.  
 
