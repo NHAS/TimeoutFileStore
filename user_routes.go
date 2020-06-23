@@ -41,9 +41,10 @@ func userGET(db *gorm.DB) gin.HandlerFunc {
 func downloadFileGET(db *gorm.DB) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		fileid := c.Param("fileid")
+		u := c.Keys["user"].(user)
 
 		var currentFile file
-		if err := db.Where("guid = ?", fileid).First(&currentFile).Error; err != nil {
+		if err := db.Where("guid = ? AND user_id = ?", fileid, u.Id).First(&currentFile).Error; err != nil {
 			c.String(404, "Not found")
 			return
 		}
@@ -54,9 +55,10 @@ func downloadFileGET(db *gorm.DB) gin.HandlerFunc {
 func deleteFilePOST(db *gorm.DB) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		fileid := c.PostForm("fileid")
+		u := c.Keys["user"].(user)
 
 		var currentFile file
-		if err := db.Where("guid = ?", fileid).First(&currentFile).Error; err != nil {
+		if err := db.Where("guid = ? AND user_id = ?", fileid, u.Id).First(&currentFile).Error; err != nil {
 			c.String(404, "Not found")
 			return
 		}
@@ -66,7 +68,7 @@ func deleteFilePOST(db *gorm.DB) gin.HandlerFunc {
 			return
 		}
 
-		if err := db.Delete(&file{}, "guid = ?", fileid).Error; err != nil {
+		if err := db.Delete(&file{}, "guid = ? AND user_id = ?", fileid, u.Id).Error; err != nil {
 			c.String(404, "Not found")
 			return
 		}
