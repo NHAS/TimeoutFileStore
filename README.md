@@ -1,7 +1,28 @@
 # TimeoutFileStore
-Serve a file for 1 hour, behind authentication. 
+Store files for a set amount of time. 
 
-Worth noting that while this follows good practice for file uploading (content-disposition header, guids for resources) it lacks some security controls. 
+## Use case
+Ever want to travel somewhere but not super sure about those border controls siezing your computers, forcing you to unlock them and using them to take control of your infastructure? 
+Nope?  
+Me neither. However I think its a fun thought experiment.  
+
+This tool goes part way to solving this issue by creating a "stall" tactic. If you stall long enough, your files which in this case would be 'keys' to your infastructure will be gone and rendering you unable to give up any way of accessing your computers. 
+
+Be warned. I have no idea how this would go legally for you. Nor how it would go physically. 
+
+But again, thought experiment. 
+
+## Installation
+
+```
+go get -u https://github.com/NHAS/TimeoutFileStore
+cd $GOHOME/go/src/github.com/NHAS/TimeoutFileStore/
+go build .
+```
+
+## Things to keep in mind
+
+While this follows good practice for file uploading (content-disposition header, guids for resources) it lacks some security controls. 
 
 * Lack of maximum file upload size
 * Lack of maximum content stored per user
