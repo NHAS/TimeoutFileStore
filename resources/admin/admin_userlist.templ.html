@@ -8,7 +8,7 @@
                     <th scope="col">Username</th>
                     <th scope="col">Last Token Created At</th>
                     <th scope="col">Is admin?</th>
-                    <th scope="col">Remove</th>
+                    <th scope="col"></th>
                 </tr>
             <tbody>
                 {{range $user := .Users}}
@@ -27,6 +27,17 @@
 
                 </tr>
                 {{end}}
+
+                <tr>
+
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td>
+                        <a href="/admin/create_user" class="btn btn-primary active">Create</a>
+                    </td>
+
+                </tr>
             </tbody>
             </thead>
         </table>

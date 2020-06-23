@@ -83,7 +83,7 @@ func filePOST(db *gorm.DB, path string) gin.HandlerFunc {
 
 		hoursFloat, err := strconv.ParseFloat(c.PostForm("hours"), 8)
 		if err != nil {
-			c.String(http.StatusBadRequest, "Form issue")
+			c.Redirect(302, "/user/file")
 			log.Println(err)
 			return
 		}
@@ -92,7 +92,7 @@ func filePOST(db *gorm.DB, path string) gin.HandlerFunc {
 
 		uploadedFile, err := c.FormFile("file")
 		if err != nil {
-			c.String(http.StatusBadRequest, "Form issue")
+			c.Redirect(302, "/user/file")
 			log.Println(err)
 			return
 		}
