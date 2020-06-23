@@ -20,6 +20,19 @@ cd $GOHOME/go/src/github.com/NHAS/TimeoutFileStore/
 go build .
 ```
 
+## Screenshots
+
+**Login**
+![Login](/images/login.png?raw=true)
+</br>
+
+**User List**
+![User List](/images/user_list.png?raw=true)
+</br>
+
+**File List**
+![File List](/images/files_list.png?raw=true)
+</br>
 ## Things to keep in mind
 
 While this follows good practice for file uploading (content-disposition header, guids for resources) it lacks some security controls. 
