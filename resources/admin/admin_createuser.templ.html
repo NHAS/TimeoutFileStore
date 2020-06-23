@@ -13,6 +13,8 @@
         <label class="form-check-label" for="exampleCheck1">Admin</label>
     </div>
     {{ .csrfField }}
-    <button type="submit" class="btn btn-primary">Create</button>
+    <div class="form-group" style="padding-top: 1em">
+        <button type="submit" class="btn btn-primary">Create</button>
+    </div>
 </form>
 {{template "AdminDashboard_Bottom" .}}
