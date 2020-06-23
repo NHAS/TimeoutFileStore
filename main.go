@@ -64,7 +64,7 @@ func fileExpiryChecker(db *gorm.DB, end chan bool) {
 
 	for {
 		select {
-		case <-time.After(10 * time.Minute):
+		case <-time.After(1 * time.Minute):
 			var files []file
 			if err := db.Find(&files).Error; err != nil {
 				log.Println(err)
@@ -72,9 +72,18 @@ func fileExpiryChecker(db *gorm.DB, end chan bool) {
 
 			for _, f := range files {
 				if time.Now().Unix() >= f.ExpiresAt {
+					path := f.Path
+
 					if err := db.Delete(&f).Error; err != nil {
 						log.Println(err)
 					}
+
+					if err := os.Remove(path); err != nil {
+						log.Println("Unable to remove ", path, " because: ", err)
+					}
+
+					log.Println("File removed: ", f.Path)
+
 				}
 			}
 
